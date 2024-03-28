@@ -51,6 +51,27 @@ export class Location {
   }
 }
 
+function loopOffset(location, offset, depth, board, color) {
+  var result = []
+  for (var k = 0; k < offset.length; k++) {
+    var offset = offset[k]
+    for (var i = 1; i <= depth; i++) {
+      var x = location.x + offset[0] * i
+      var y = location.y + offset[1] * i
+      if (!isInside(x, y)) break;
+      var piece = board.pieces[x][y]
+      if (piece != null) {
+        if (piece.color != color) {
+          result.push(new Move(x, y, true))
+        }
+        break;
+      }
+      result.push(new Move(x, y, true))
+    }
+  }
+  return result
+}
+
 function isInside(x, y) {
   return 0 <= x && x < 8 && 0 <= y && y < 8;
 }
@@ -62,32 +83,12 @@ function isAttacking(board, color, x, y) {
 
 let BISHOP_OFFSET = [[1, 1], [-1, -1], [1, -1], [-1, 1]]
 let BISHOP = new PieceType("Bishop", 3, (board, color, location) => {
-  var result = []
-  for (var i = 1; i <= 8; i++) {
-    for (var k = 0; k < BISHOP_OFFSET.length; k++) {
-      var offset = BISHOP_OFFSET[k]
-      var x = location.x + offset[0] * i
-      var y = location.y + offset[1] * i
-      if (!isInside(x, y)) continue;
-      result.push(new Move(x, y, true))
-    }
-  }
-  return result
+  return loopOffset(location, BISHOP_OFFSET, 8, board, color)
 })
 
 let ROOK_OFFSET = [[0, 1], [0, -1], [1, 0], [1, -1]]
 let ROOK = new PieceType("Rook", 5, (board, color, location) => {
-  var result = []
-  for (var i = 1; i <= 8; i++) {
-    for (var k = 0; k < ROOK_OFFSET.length; k++) {
-      var offset = ROOK_OFFSET[k]
-      var x = location.x + offset[0] * i
-      var y = location.y + offset[1] * i
-      if (!isInside(x, y)) continue;
-      result.push(new Move(x, y, true))
-    }
-  }
-  return result
+  return loopOffset(location, ROOK_OFFSET, 8, board, color)
 })
 
 let QUEEN = new PieceType("Queen", 9, (board, color, location) => {
@@ -99,15 +100,7 @@ let QUEEN = new PieceType("Queen", 9, (board, color, location) => {
 
 let KNIGHT_OFFSET = [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]]
 let KNIGHT = new PieceType("Knight", 3, (board, color, location) => {
-  var result = []
-  for (var k = 0; k < KNIGHT_OFFSET.length; k++) {
-    var offset = KNIGHT_OFFSET[k]
-    var x = location.x + offset[0] * i
-    var y = location.y + offset[1] * i
-    if (!isInside(x, y)) continue;
-    result.push(new Move(x, y, true))
-  }
-  return result
+  return loopOffset(location, KNIGHT_OFFSET, 1, board, color)
 })
 
 let KING_OFFSET = function() {
